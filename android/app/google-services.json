@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "1048940340340",
+    "project_id": "interventionapp-3a277",
+    "storage_bucket": "interventionapp-3a277.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1048940340340:android:1220e61f5c2d051cb29d21",
+        "android_client_info": {
+          "package_name": "com.example.app_intervention"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1048940340340-q5j3vlnmv06n2demf2abonfqabmpnue8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCeg3A6seUGbNdZMy9u0vfmOHFudobxmNA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1048940340340-q5j3vlnmv06n2demf2abonfqabmpnue8.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
