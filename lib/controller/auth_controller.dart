@@ -185,9 +185,10 @@ class AuthController extends GetxController {
           'image': url_new,
           'registrationNumber': registrationNumber,
           'birthDate': birthDate,
+
+
         }).then((value) {
           isProfileUploading(false);
-          Get.to(() => HomeScreenCitizen(this));
         });
         print('Data added successfully!');
       }
@@ -206,10 +207,14 @@ class AuthController extends GetxController {
           'longitude': 0,
           'citizenPhoneNumber':"",
           'lastInterventionDate':DateTime.now(),
-          'occupee':'libre'
+          'valid':false,
+          'isConnected':true,
+          'occupee':'libre',
+          'countIntervention':0
+
+
         }).then((value) {
           isProfileUploading(false);
-          Get.to(() => HomeScreenAssistant(this));
         });
       }
     } catch (e) {
@@ -222,7 +227,7 @@ updatePosition(LatLng position) async {
     'latitude': position.latitude,
     'longitude':position.longitude,});
 }
-  void UpdateDataToFirestore(
+void UpdateDataToFirestore(
       String firstName,
       String lastName,
       String username,
@@ -243,7 +248,8 @@ updatePosition(LatLng position) async {
         'gender': gender,
         'image': selectedImage,
         'registrationNumber': registrationNumber,
-        'birthDate': birthDate
+        'birthDate': birthDate,
+        'isConnected':true
       }).then((value) {
         isProfileUploading(false);
         if (typeOfUser == "Citizen")
@@ -296,22 +302,39 @@ updatePosition(LatLng position) async {
 
       if (value.exists) {
         print(value["firstName"]);
+
+
         if (value["password"] == hashPassword(password)) {
           this.isProfileUploading(false);
           this.phoneNumber = phoneNumber;
           this.typeOfUser = typeOfUser;
-          if(typeOfUser=="admin")
-            Get.to(()=>HomeScreenAdmin(this));
-          else if (typeOfUser == "Citizen")
-            Get.to(() => HomeScreenCitizen(this));
-          else
-            Get.to(() => HomeScreenAssistant(this));
-        } else {
+            if (typeOfUser == "admin")
+              Get.to(() => HomeScreenAdmin(this));
+            else if (typeOfUser == "Citizen")
+              Get.to(() => HomeScreenCitizen(this));
+            else {
+              if(value['valid']) {
+                Map<String, dynamic> data = {
+                  'isConnected': true,
+                };
+                _firestore
+                    .collection(typeOfUser)
+                    .doc(phoneNumber)
+                    .update(data);
+                Get.to(() => HomeScreenAssistant(this));
+              }else{
+                this.isProfileUploading(false);
+                Get.back();
+                Get.to(() => LoginScreen("the account is not valid"));
+              }
+            }
+          }
+         else {
           this.isProfileUploading(false);
           Get.back();
           Get.to(LoginScreen("wrong password"));
-        }
-      } else {
+        }}
+      else {
         this.isProfileUploading(false);
         Get.back();
         Get.to(LoginScreen("wrong phone number"));
@@ -332,7 +355,13 @@ updatePosition(LatLng position) async {
       Get.to(() => LoginScreen("wrong phone number or wrong connection"));
     });
   }
-
+logout(){
+  Map<String, dynamic> data = {
+    'isConnected': false,
+  };
+  _firestore.collection(typeOfUser).doc(phoneNumber).update(data);
+  FirebaseAuth.instance.signOut();
+}
 // Fonction pour obtenir la position actuelle de l'utilisateur
   Future<Position> getCurrentLocation() async {
     return await Geolocator.getCurrentPosition();
@@ -420,6 +449,7 @@ updatePosition(LatLng position) async {
   validateIntervention() {
     Map<String, dynamic> data = {
       'occupee': "occupee",
+      'countIntervention': myUser.value.countIntervention!+1,
     };
     _firestore.collection(this.typeOfUser).doc(this.phoneNumber).update(data);
   }

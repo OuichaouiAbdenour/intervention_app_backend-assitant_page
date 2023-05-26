@@ -62,7 +62,7 @@ class LocationController extends GetxController {
 
     // Query the users collection where age is greater than or equal to 18
     QuerySnapshot<Object?> querySnapshot =
-    await usersRef.where('occupee', isEqualTo: "libre").get();
+    await usersRef.where('occupee', isEqualTo: "libre").where('isConnected',isEqualTo: true).where('valid',isEqualTo: true).get();
     double min = double.infinity;
     late var docRef=null;
     for (QueryDocumentSnapshot<Object?> documentSnapshot

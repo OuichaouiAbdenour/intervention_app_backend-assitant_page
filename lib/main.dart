@@ -1,4 +1,5 @@
 import 'package:app_intervention/views/FirefightDashbord.dart';
+import 'package:app_intervention/views/HomeScreenAdmin.dart';
 import 'package:app_intervention/views/HomeScreenAssistant.dart';
 import 'package:app_intervention/views/HomeScreenCitizen.dart';
 import 'package:app_intervention/views/login_screen.dart';
@@ -33,14 +34,14 @@ class MyApp extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
 
     AuthController authController = Get.put(AuthController());
-    authController.setPhoneNumber("+213778545710");
-    authController.settypeOfUser("admin");
+    authController.setPhoneNumber("+213674818632");
+    authController.settypeOfUser("Police officer");
 
     return  GetMaterialApp(
       theme: ThemeData(
         textTheme: GoogleFonts.poppinsTextTheme(textTheme),
       ),
-      home: FirefightDashboard(authController),
+      home: HomeScreenAssistant(authController),
     );
   }
 }

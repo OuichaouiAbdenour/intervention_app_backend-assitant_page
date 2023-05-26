@@ -59,13 +59,14 @@ class _FirefightDashboardState extends State<FirefightDashboard> {
     final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
     return Scaffold(
-        drawer: buildDrawer(authController),
+        drawer: buildDrawerAdmin(authController),
         body:Stack(
             children: [
          Padding(
-            padding: EdgeInsets.all(16.0),
+            padding: EdgeInsets.only(left: 16.0 ,right: 16.0,top :120),
             child: StreamBuilder<QuerySnapshot>(
-              stream: firestore.collection('Firefight').snapshots(),
+              stream: firestore.
+              collection('Firefighter').where("valid",isEqualTo: true).snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.hasError) {
                   return Text('Error retrieving data');
@@ -75,17 +76,40 @@ class _FirefightDashboardState extends State<FirefightDashboard> {
                   return Center(child: CircularProgressIndicator());
                 }
 
-                final firefight = snapshot.data!.docs;
+                final firefighter = snapshot.data!.docs;
 
                 return ListView.builder(
-                  itemCount: firefight.length,
+                  itemCount: firefighter.length,
                   itemBuilder: (context, index) {
-                    final metric = firefight[index].data() as Map<String, dynamic>;
+                    final metric = firefighter[index].data() as Map<String, dynamic>;
                     final nom = metric['firstName'];
                     final prenom = metric['lastName'];
-                    return ListTile(
-                      title: Text(nom),
-                      subtitle: Text(prenom),
+                    return Card(
+                      child: ListTile(
+                        leading: Icon(Icons.person),
+                        title: Text(firefighter[index].id),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('firstName :${nom}'),
+                            Text('lastName : ${prenom}'),
+                            Text('stat : ${metric['occupee']}'),
+                            Text('nombre d\'intervention : ${metric['countIntervention']}'),
+                            greenButton('delete firefighter', (){
+                              firestore.collection('Firefighter').doc(firefighter[index].id).delete();
+                            }),
+                            const SizedBox(
+                              height: 30,
+                            ),
+                            greenButton('cancel action', (){
+                              firestore.collection('Firefighter').doc(firefighter[index].id).update({"occupee": "libre"});
+                            }),
+                          ],
+                        ),
+                        onTap: () {
+                          // Handle onTap action
+                        },
+                      ),
                     );
                   },
                 );

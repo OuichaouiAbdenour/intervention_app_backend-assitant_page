@@ -46,7 +46,7 @@ class _HomeScreenCitizenState extends State<HomeScreenCitizen> {
   /*late LatLng source;
   Set<Marker> markers=Set<Marker>();*/
   late Position? _currentPosition = null;
- final Set<Polyline> _polyline = {};
+  final Set<Polyline> _polyline = {};
   bool showError = false;
 
   bool showProgresseIndicator = false;
@@ -66,10 +66,19 @@ class _HomeScreenCitizenState extends State<HomeScreenCitizen> {
   }
 
   _listenStatIntervenant(BuildContext context) async {
-    if(intervenant!=null)
+    if (intervenant != null){
 
-      await authController.getIntervenantData(
-          dropdownValue, intervenant.id);
+        await authController.getIntervenantData(dropdownValue, intervenant.id);
+
+        if(authController.myIntervenant.value.stat=="libre"){
+
+          setState(() {
+            _polyline.clear();
+            _markers.clear();
+          });
+        }
+
+    }
     Timer(Duration(seconds: 20), () async {
       if (intervenant == null) {
         setState(() {
@@ -77,7 +86,6 @@ class _HomeScreenCitizenState extends State<HomeScreenCitizen> {
           showError = true;
         });
       } else {
-
         if (authController.myIntervenant.value.stat != null) {
           if ("occupee" != authController.myIntervenant.value.stat) {
             Map<String, dynamic> data = {
@@ -94,17 +102,15 @@ class _HomeScreenCitizenState extends State<HomeScreenCitizen> {
             setState(() {
               showProgresseIndicator = false;
               showError = true;
-
             });
           } else {
             setState(() {
               showProgresseIndicator = false;
             });
-            final LatLng startPoint = LatLng(_currentPosition!.latitude,
-                _currentPosition!.longitude);
-            final LatLng endPoint = LatLng(
-                intervenant["latitude"],
-                intervenant["longitude"]);
+            final LatLng startPoint =
+                LatLng(_currentPosition!.latitude, _currentPosition!.longitude);
+            final LatLng endPoint =
+                LatLng(intervenant["latitude"], intervenant["longitude"]);
             final Polyline polyline = Polyline(
               polylineId: PolylineId('myPolyline'),
               color: Colors.blue,
@@ -112,15 +118,13 @@ class _HomeScreenCitizenState extends State<HomeScreenCitizen> {
               width: 3,
             );
 
-            double devicePixelRatio =
-                MediaQuery.of(context).devicePixelRatio;
+            double devicePixelRatio = MediaQuery.of(context).devicePixelRatio;
             double markerSize =
                 48 * devicePixelRatio; // Adjust the size as needed
 
             ImageConfiguration configuration =
-            createLocalImageConfiguration(context);
-            BitmapDescriptor markerIcon =
-            await BitmapDescriptor.fromAssetImage(
+                createLocalImageConfiguration(context);
+            BitmapDescriptor markerIcon = await BitmapDescriptor.fromAssetImage(
               configuration,
               'assets/pompier.png', // Replace with your image asset path
             );
@@ -177,6 +181,25 @@ class _HomeScreenCitizenState extends State<HomeScreenCitizen> {
 
   @override
   Widget build(BuildContext context) {
+    if (authController.myIntervenant.value.stat != null) {
+      setState(() {
+        FirebaseFirestore.instance
+            .collection(dropdownValue)
+            .doc(intervenant.id)
+            .snapshots()
+            .listen((event) {
+          if (event.data() != null) {
+            var data = event.data() as Map<String, dynamic>;
+            if (data['occupee'] == "libre") {
+              setState(() {
+                _polyline.clear();
+                _markers.clear();
+              });
+            }
+          }
+        });
+      });
+    }
     return _currentPosition == null
         ? Scaffold(
             drawer: buildDrawer(authController),
@@ -211,25 +234,25 @@ class _HomeScreenCitizenState extends State<HomeScreenCitizen> {
                 buildBottomSheet(context),
                 Center(
                   child: showProgresseIndicator
-                      ?
-                           CircularProgressIndicator()
-                      : showError? AlertDialog(
-                    title: Text('Error'),
-                    content: Text('No intervenants available.'),
-                    actions: [
-                      TextButton(
-                        onPressed: () {
-                          setState(() {
-                            showError=false;
-                          }); // Dismiss the dialog
-                          // Perform any additional actions here
-                        },
-                        child: Text('OK'),
-                      ),
-                    ],
-                  ):Center(),
+                      ? CircularProgressIndicator()
+                      : showError
+                          ? AlertDialog(
+                              title: Text('Error'),
+                              content: Text('No intervenants available.'),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      showError = false;
+                                    }); // Dismiss the dialog
+                                    // Perform any additional actions here
+                                  },
+                                  child: Text('OK'),
+                                ),
+                              ],
+                            )
+                          : Center(),
                 ),
-
               ],
             ),
           );
@@ -802,25 +825,54 @@ class _HomeScreenCitizenState extends State<HomeScreenCitizen> {
                   ]),
               child: ElevatedButton(
                 onPressed: () async {
-                  Get.back();
-                  Get.back();
-                  //selon les inpute "dropdownValueState" et "dropdownValueType" afficter vers bon recherche de pompier
-                  LocationController locationController = LocationController();
-                  locationController.setSource(_currentPosition!);
-                  locationController.setTypeOfUset(dropdownValue);
+                  bool confirmed = await showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: Text("Confirmation"),
+                        content: Text("Are you sure you want to confirm?"),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop(
+                                  true); // Renvoie true si l'option "Yes" est sélectionnée
+                            },
+                            child: Text("Yes"),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop(
+                                  false); // Renvoie false si l'option "No" est sélectionnée
+                            },
+                            child: Text("No"),
+                          ),
+                        ],
+                      );
+                    },
+                  );
 
-                  setState(() {
-                    showProgresseIndicator = true;
+                  if (confirmed == true) {
+                    Get.back();
+                    Get.back();
+                    //selon les inpute "dropdownValueState" et "dropdownValueType" afficter vers bon recherche de pompier
+                    LocationController locationController =
+                        LocationController();
+                    locationController.setSource(_currentPosition!);
+                    locationController.setTypeOfUset(dropdownValue);
 
-                    showError = false;
-                  });
-                  intervenant = await locationController
-                      .selectIntervenant(authController.phoneNumber);
+                    setState(() {
+                      showProgresseIndicator = true;
+
+                      showError = false;
+                    });
+                    intervenant = await locationController
+                        .selectIntervenant(authController.phoneNumber);
 // Attach a listener to the field
 
-                  await _listenStatIntervenant(context);
+                    await _listenStatIntervenant(context);
 
-                  //_openGoogleMaps(startLatitude,startLongitude,test["latitude"].toString(),test["longitude"].toString());
+                    //_openGoogleMaps(startLatitude,startLongitude,test["latitude"].toString(),test["longitude"].toString());
+                  }
                 },
                 child: const Text('Confirmation'),
                 style: ButtonStyle(
@@ -1032,56 +1084,54 @@ class _HomeScreenCitizenState extends State<HomeScreenCitizen> {
                 ]),
             child: ElevatedButton(
               onPressed: () async {
-                //selon les inpute "dropdownValueState" et "dropdownValueType" afficter vers bon recherche de pompier
-
-                LocationController locationController = LocationController();
-                locationController.setSource(_currentPosition!);
-                locationController.setTypeOfUset(dropdownValue);
-                var test = await locationController
-                    .selectIntervenant(authController.phoneNumber);
-                print(test);
-                String startLatitude = _currentPosition!.latitude.toString();
-                String startLongitude = _currentPosition!.longitude.toString();
-                String endLatitude = test["longitude"];
-                String endLongitude = test["latitude"];
-                final LatLng startPoint = LatLng(
-                    _currentPosition!.latitude, _currentPosition!.longitude);
-                final LatLng endPoint =
-                    LatLng(test["latitude"], test["longitude"]);
-                final Polyline polyline = Polyline(
-                  polylineId: PolylineId('myPolyline'),
-                  color: Colors.blue,
-                  points: [startPoint, endPoint],
-                  width: 3,
-                );
-                double devicePixelRatio =
-                    MediaQuery.of(context).devicePixelRatio;
-                double markerSize =
-                    48 * devicePixelRatio; // Adjust the size as needed
-
-                ImageConfiguration configuration =
-                    createLocalImageConfiguration(context);
-                BitmapDescriptor markerIcon =
-                    await BitmapDescriptor.fromAssetImage(
-                  configuration,
-                  'assets/policier.png', // Replace with your image asset path
+                bool confirmed = await showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: Text("Confirmation"),
+                      content: Text("Are you sure you want to confirm?"),
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.of(context).pop(
+                                true); // Renvoie true si l'option "Yes" est sélectionnée
+                          },
+                          child: Text("Yes"),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.of(context).pop(
+                                false); // Renvoie false si l'option "No" est sélectionnée
+                          },
+                          child: Text("No"),
+                        ),
+                      ],
+                    );
+                  },
                 );
 
-                _polyline.add(polyline);
-                _markers.add(
-                  Marker(
-                    icon: markerIcon,
-                    markerId: MarkerId("3"),
-                    position: endPoint,
-                    infoWindow: InfoWindow(
-                      title: 'My Current Location',
-                    ),
-                  ),
-                );
-                Get.back();
-                Get.back();
+                if (confirmed == true) {
+                  Get.back();
+                  Get.back();
+                  //selon les inpute "dropdownValueState" et "dropdownValueType" afficter vers bon recherche de pompier
+                  LocationController locationController =
+                  LocationController();
+                  locationController.setSource(_currentPosition!);
+                  locationController.setTypeOfUset(dropdownValue);
 
-                //  _openGoogleMaps(startLatitude,startLongitude,endLatitude,endLongitude);
+                  setState(() {
+                    showProgresseIndicator = true;
+
+                    showError = false;
+                  });
+                  intervenant = await locationController
+                      .selectIntervenant(authController.phoneNumber);
+// Attach a listener to the field
+
+                  await _listenStatIntervenant(context);
+
+                  //_openGoogleMaps(startLatitude,startLongitude,test["latitude"].toString(),test["longitude"].toString());
+                }
               },
               child: const Text('Confirmation'),
               style: ButtonStyle(

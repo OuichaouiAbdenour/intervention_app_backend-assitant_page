@@ -160,6 +160,7 @@ initState() {
                         points: [startPoint, endPoint],
                         width: 3,
                       );
+
                       _markers.add(Marker(
                         markerId: MarkerId("3"),
 
@@ -189,7 +190,8 @@ initState() {
               authController.validateIntervention();
               LocationController locationController= LocationController();
               locationController.openGoogleMaps(_currentPosition!.latitude.toString(),_currentPosition!.longitude.toString(),destination!.latitude.toString(),destination!.longitude.toString());
-              Get.to(HomeScreenAssistant(authController));
+             _markers.clear();
+             _polyline.clear();
             });
 
           }):greenButton("terminer", () {

@@ -6,8 +6,11 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../controller/auth_controller.dart';
 import '../utils/app_colors.dart';
+import '../views/CitizenDashboard.dart';
 import '../views/FirefightDashbord.dart';
+import '../views/HomeScreenAdmin.dart';
 import '../views/HomeScreenCitizen.dart';
+import '../views/PoliceDashboard.dart';
 import '../views/my_profile_screen.dart';
 import '../views/register_screen.dart';
 
@@ -137,7 +140,7 @@ Widget buildDrawer(AuthController authController) {
               buildDrawerItem(
                   title: 'Log Out',
                   onPressed: ()  {
-                    FirebaseAuth.instance.signOut();
+                    authController.logout();
                     Get.to(()=>LoginScreen(""));
 
                   }),
@@ -228,18 +231,20 @@ Widget buildDrawerAdmin(AuthController authController) {
             children: [
               buildDrawerItem(
                   title: 'Home',
-                  onPressed: () => {Get.to(() => HomeScreenCitizen(authController))},
+                  onPressed: () => {Get.to(() => HomeScreenAdmin(authController))},
                   isVisible: true),
-              buildDrawerItem(title: 'History', onPressed: () {}),
-              buildDrawerItem(
-                  title: 'Profile',
-                  onPressed: () {
-                    Get.to(() => FirefightDashboard(authController));
-                  }),
+
+              buildDrawerItem(title: ' Citizen', onPressed: () {Get.to(()=> CitizenDashboard(authController));}),
+
+              buildDrawerItem(title: ' Firefighter Dashboard', onPressed: () {Get.to(()=> FirefightDashboard(authController));}),
+              buildDrawerItem(title: ' Police Dashboard', onPressed: () {Get.to(()=> PoliceDashboard(authController));}),
+
+
               buildDrawerItem(
                   title: 'Log Out',
                   onPressed: ()  {
-                    FirebaseAuth.instance.signOut();
+
+                    authController.logout();
                     Get.to(()=>LoginScreen(""));
 
                   }),

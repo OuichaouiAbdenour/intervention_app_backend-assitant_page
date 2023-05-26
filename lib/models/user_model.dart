@@ -12,6 +12,7 @@ class UserModel {
   String? stat;
   String? phoneNumber;
   String? typeOfUser;
+  int? countIntervention;
   UserModel({this.email,this.firstName,this.gender,this.image,this.lastName,this.password,this.username,this.userType});
 
   UserModel.fromJson(Map<String,dynamic> json){
@@ -26,6 +27,6 @@ class UserModel {
     username = json['username'];
     stat=json['occupee'];
     citizenPhoneNumber=json['citizenPhoneNumber'];
-
+    countIntervention=json['countIntervention'];
   }
 }

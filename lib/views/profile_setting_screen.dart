@@ -450,7 +450,8 @@ class _ProfileSettingScreenState extends State<ProfileSettingScreen> {
 
                       );
 
-
+                      authController.loginUser(widget.phoneNumber,
+                        passwordController.text,userTypeController);
                       //Get.to(()=>HomeScreen(userTypeController, widget.phoneNumber));
                     })),
                   ],
