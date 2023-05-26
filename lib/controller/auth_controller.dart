@@ -32,6 +32,7 @@ import 'package:pointycastle/pointycastle.dart';
 import 'dart:typed_data';
 import 'package:geolocator/geolocator.dart';
 
+import '../views/HomeScreenAdmin.dart';
 import '../views/HomeScreenAssistant.dart';
 
 class AuthController extends GetxController {
@@ -299,7 +300,9 @@ updatePosition(LatLng position) async {
           this.isProfileUploading(false);
           this.phoneNumber = phoneNumber;
           this.typeOfUser = typeOfUser;
-          if (typeOfUser == "Citizen")
+          if(typeOfUser=="admin")
+            Get.to(()=>HomeScreenAdmin(this));
+          else if (typeOfUser == "Citizen")
             Get.to(() => HomeScreenCitizen(this));
           else
             Get.to(() => HomeScreenAssistant(this));

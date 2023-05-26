@@ -58,22 +58,22 @@ class LocationController extends GetxController {
   }
 
   selectIntervenant(String phoneNumber) async {
-    CollectionReference usersRef =await _firestore.collection(typeOfUser);
+    CollectionReference usersRef = await _firestore.collection(typeOfUser);
 
     // Query the users collection where age is greater than or equal to 18
     QuerySnapshot<Object?> querySnapshot =
-        await usersRef.where('occupee', isEqualTo: "libre").get();
+    await usersRef.where('occupee', isEqualTo: "libre").get();
     double min = double.infinity;
-    late DocumentReference docRef;
+    late var docRef=null;
     for (QueryDocumentSnapshot<Object?> documentSnapshot
-        in querySnapshot.docs) {
+    in querySnapshot.docs) {
       Timestamp birthDate = documentSnapshot.get('birthDate');
       Timestamp lastInterventionDate =
-          documentSnapshot.get("lastInterventionDate");
+      documentSnapshot.get("lastInterventionDate");
       double lat1 = documentSnapshot.get("latitude");
       double lon1 = documentSnapshot.get("longitude");
       double distance =
-          getDistance(lat1, lon1, source.latitude, source.longitude);
+      getDistance(lat1, lon1, source.latitude, source.longitude);
       double cost = costFunction(birthDate, lastInterventionDate, distance);
       if (min > cost) {
         min = cost;
@@ -81,14 +81,17 @@ class LocationController extends GetxController {
       }
       //print(name);
     }
-    Map<String, dynamic> data = {'occupee': "demander",
-    'citizenPhoneNumber':phoneNumber,
+    if (docRef != null){
+      Map<String, dynamic> data = {'occupee': "demander",
+        'citizenPhoneNumber': phoneNumber,
 
-    };
+      };
     await docRef.update(data).catchError((error) {
       print('Error sending location data to Firebase: $error');
     });
     return docRef.get();
+  }
+  return null;
 
   }
 }

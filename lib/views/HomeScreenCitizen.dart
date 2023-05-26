@@ -70,7 +70,7 @@ class _HomeScreenCitizenState extends State<HomeScreenCitizen> {
 
       await authController.getIntervenantData(
           dropdownValue, intervenant.id);
-    Timer(Duration(seconds: 50), () async {
+    Timer(Duration(seconds: 20), () async {
       if (intervenant == null) {
         setState(() {
           showProgresseIndicator = false;

@@ -71,7 +71,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   GlobalKey<FormState> formkey = GlobalKey<FormState>();
 
-  List<String> userTypes = ['Citizen', 'Firefighter', 'Police officer'];
+  List<String> userTypes = ['Citizen', 'Firefighter', 'Police officer','admin'];
   late String userTypeController = 'Citizen';
 
   AuthController authController = Get.find<AuthController>();
